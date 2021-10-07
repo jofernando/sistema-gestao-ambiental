@@ -46,4 +46,9 @@ class Visita extends Model
     {
         return $this->belongsTo(User::class, 'analista_id');
     }
+
+    public function notificacao()
+    {
+        return $this->hasOne(Notificacao::class);
+    }
 }
