@@ -78,7 +78,7 @@
                                                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
                                                                 @if($visita->relatorio!=null)<a class="dropdown-item" href="{{route('relatorios.show', ['relatorio' => $visita->relatorio])}}">Relatório</a>@endif
                                                                 <hr>
-                                                                <a class="dropdown-item">Notificar</a>
+                                                                @if($visita->notificacao!=null)<a class="dropdown-item" href="{{route('notificacoes.show', ['notificacao' => $visita->notificacao])}}">Notificação</a>@endif
                                                                 <a class="dropdown-item" href="{{route('visitas.edit', ['visita' => $visita->id])}}">Editar visita</a>
                                                                 <a class="dropdown-item" data-toggle="modal" data-target="#modalStaticDeletarVisita_{{$visita->id}}" style="color: red; cursor: pointer;">Deletar visita</a>
 
@@ -93,7 +93,11 @@
                                                         <div class="dropdown-menu">
                                                             <a class="dropdown-item" href="{{route('requerimentos.show', ['requerimento' => $visita->requerimento])}}">Visualizar</a>
                                                             <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item">Notificar</a>
+                                                            @if ($visita->notificacao == null)
+                                                                <a class="dropdown-item" href="{{route('visitas.notificacoes.create', ['visita' => $visita])}}">Notificar</a>
+                                                            @else
+                                                                <a class="dropdown-item" href="{{route('notificacoes.show', ['notificacao' => $visita->notificacao])}}">Notificação</a>
+                                                            @endif
                                                             <a href="@if($visita->relatorio != null){{route('relatorios.edit', ['relatorio' => $visita->relatorio])}}@else{{route('relatorios.create', ['visita' => $visita->id])}}@endif" class="dropdown-item">Relatório</a>
                                                         </div>
                                                     </div>
