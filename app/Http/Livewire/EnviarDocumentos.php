@@ -47,7 +47,6 @@ class EnviarDocumentos extends Component
         if ($documento->pivot->status == Checklist::STATUS_ENUM['nao_enviado'] || $documento->status == \App\Models\Checklist::STATUS_ENUM['recusado'] || ($this->requerimento->status == $this->requerimentoStatus['documentos_requeridos'] || $documento->status == \App\Models\Checklist::STATUS_ENUM['enviado'])) {
             $this->withValidator(function (Validator $validator) {
                 if ($validator->fails()) {
-
                     $this->dispatchBrowserEvent('swal:fire', [
                         'icon' => 'error',
                         'title' => 'Erro ao enviar o arquivo, verifique o campo inválido!'
@@ -60,6 +59,10 @@ class EnviarDocumentos extends Component
             $this->requerimento->documentos()->updateExistingPivot($id, [
                 'caminho' => $value->store("documentos/requerimentos/{$this->requerimento->id}"),
                 'status' => Checklist::STATUS_ENUM['enviado'],
+            ]);
+            $this->dispatchBrowserEvent('swal:fire', [
+                'icon' => 'success',
+                'title' => 'Documento anexado!'
             ]);
         }
     }
