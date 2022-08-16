@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\FotoVisita;
 use App\Models\Requerimento;
 use App\Models\SolicitacaoPoda;
-use App\Models\Visita;
 use App\Models\User;
+use App\Models\Visita;
 use App\Notifications\VisitaAlteradaPoda;
 use App\Notifications\VisitaAlteradaRequerimento;
 use App\Notifications\VisitaCanceladaPoda;
@@ -32,7 +32,7 @@ class VisitaController extends Controller
         $visitas = collect();
         if (auth()->user()->role == User::ROLE_ENUM['secretario']) {
             $visitas = Visita::orderBy('data_marcada', 'DESC')->paginate(10);
-        } else if (auth()->user()->role == User::ROLE_ENUM['analista']) {
+        } elseif (auth()->user()->role == User::ROLE_ENUM['analista']) {
             $visitas = Visita::where('analista_id', auth()->user()->id)->orderBy('data_marcada', 'DESC')->paginate(10);
         }
 
@@ -65,7 +65,7 @@ class VisitaController extends Controller
         $request->validate([
             'data_marcada' => 'required|date',
             'requerimento' => 'required',
-            'analista'     => 'required',
+            'analista' => 'required',
         ]);
 
         $visita = new Visita();
@@ -97,6 +97,7 @@ class VisitaController extends Controller
     public function foto(Visita $visita, FotoVisita $foto)
     {
         $this->authorize('view', $visita);
+
         return Storage::download($foto->caminho);
     }
 
@@ -132,7 +133,7 @@ class VisitaController extends Controller
         $request->validate([
             'data_marcada' => 'required|date',
             'requerimento' => 'required',
-            'analista'     => 'required',
+            'analista' => 'required',
         ]);
 
         if ($visita->requerimento_id != $request->requerimento) {
@@ -170,10 +171,10 @@ class VisitaController extends Controller
     {
         $this->authorize('isSecretario', User::class);
         $visita = Visita::find($id);
-        if($visita->requerimento_id != null){
-            if($visita->requerimento->status == Requerimento::STATUS_ENUM['visita_realizada'] || $visita->requerimento->status == Requerimento::STATUS_ENUM['finalizada']){
-                return redirect()->back()->with(['error' => "As informações desta visita não podem ser excluídas."]);
-            }else{
+        if ($visita->requerimento_id != null) {
+            if ($visita->requerimento->status == Requerimento::STATUS_ENUM['visita_realizada'] || $visita->requerimento->status == Requerimento::STATUS_ENUM['finalizada']) {
+                return redirect()->back()->with(['error' => 'As informações desta visita não podem ser excluídas.']);
+            } else {
                 $visita->requerimento->status = Requerimento::STATUS_ENUM['documentos_aceitos'];
                 $visita->requerimento->update();
             }
@@ -193,7 +194,6 @@ class VisitaController extends Controller
 
         $visita->delete();
 
-
         return redirect(route('visitas.index'))->with(['success' => 'Visita deletada com sucesso!']);
     }
 
@@ -208,7 +208,7 @@ class VisitaController extends Controller
         $this->authorize('isSecretario', User::class);
         $request->validate([
             'data' => 'required',
-            'analista' => 'required'
+            'analista' => 'required',
         ]);
 
         $visita = new Visita();
@@ -252,6 +252,7 @@ class VisitaController extends Controller
         $visitas = Visita::all();
 
         $pdf = PDF::loadview('pdf/visitas', ['visitas' => $visitas]);
+
         return $pdf->setPaper('a4')->stream('visitas.pdf');
     }
 }

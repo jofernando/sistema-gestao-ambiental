@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -98,12 +98,13 @@ class User extends Authenticatable implements MustVerifyEmail
                 ->where('requerimentos.cancelada', '=', false)
                 ->where('requerimentos.status', '=', Requerimento::STATUS_ENUM['documentos_requeridos'])
                 ->get('requerimentos.id');
-                
+
         $requerimento = Requerimento::whereIn('id', $requerimentos_id->pluck('id'))->orderBy('created_at', 'DESC')->first();
 
-        if($requerimento != null && $requerimento->documentos()->where('status', Checklist::STATUS_ENUM['enviado'])->first() == null){
+        if ($requerimento != null && $requerimento->documentos()->where('status', Checklist::STATUS_ENUM['enviado'])->first() == null) {
             $requerimento = null;
         }
+
         return $requerimento;
     }
 
@@ -111,7 +112,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->name = $input['name'];
         $this->email = $input['email'];
-        if($input['password'] != null){
+        if ($input['password'] != null) {
             $this->password = Hash::make($input['password']);
         }
     }
@@ -126,7 +127,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(TipoAnalista::class, 'tipo_analista_user', 'user_id', 'tipo_analista_id');
     }
 
-    public function noticias() 
+    public function noticias()
     {
         return $this->hasMany(Noticia::class, 'autor_id');
     }
@@ -136,8 +137,9 @@ class User extends Authenticatable implements MustVerifyEmail
         $requerimentos_id = DB::table('requerimentos')->join('empresas', 'requerimentos.empresa_id', '=', 'empresas.id')
                 ->where('empresas.user_id', '=', auth()->user()->id)
                 ->get('requerimentos.id');
-                
+
         $requerimentos = Requerimento::whereIn('id', $requerimentos_id->pluck('id'))->orderBy('created_at', 'DESC')->paginate(5);
+
         return $requerimentos;
     }
 
@@ -206,7 +208,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function ehAnalista()
     {
         if ($this->role == User::ROLE_ENUM['analista']) {
-            return $this->tipo_analista()->where('tipo', TipoAnalista::TIPO_ENUM['processo'])->get()->count()  > 0;
+            return $this->tipo_analista()->where('tipo', TipoAnalista::TIPO_ENUM['processo'])->get()->count() > 0;
         }
 
         return false;
@@ -216,7 +218,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * salva a foto do perfil do usuário.
      *
      * @param Request $request
-     * @return boolean
+     * @return bool
      */
     public function salvarFoto(Request $request)
     {
@@ -224,8 +226,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
         if ($file != null) {
             if ($this->profile_photo_path != null) {
-                if (Storage::disk()->exists('public/'. $this->profile_photo_path)) {
-                    Storage::delete('public/'. $this->profile_photo_path);
+                if (Storage::disk()->exists('public/' . $this->profile_photo_path)) {
+                    Storage::delete('public/' . $this->profile_photo_path);
                 }
             }
 

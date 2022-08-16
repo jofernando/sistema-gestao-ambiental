@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Visita;
+use App\Http\Requests\RelatorioRequest;
 use App\Models\Relatorio;
 use App\Models\Requerimento;
-use App\Http\Requests\RelatorioRequest;
+use App\Models\Visita;
+use Illuminate\Http\Request;
 
 class RelatorioController extends Controller
 {
@@ -30,6 +30,7 @@ class RelatorioController extends Controller
     {
         $this->authorize('isSecretarioOrAnalista', User::class);
         $visita = Visita::find($id);
+
         return view('relatorio.create', compact('visita'));
     }
 
@@ -54,7 +55,6 @@ class RelatorioController extends Controller
             $requerimento->update();
         }
 
-
         return redirect(route('visitas.index'))->with(['success' => 'Relátorio salvo com sucesso!']);
     }
 
@@ -68,6 +68,7 @@ class RelatorioController extends Controller
     {
         $this->authorize('isSecretarioOrAnalista', User::class);
         $relatorio = Relatorio::find($id);
+
         return view('relatorio.show', compact('relatorio'));
     }
 
@@ -81,6 +82,7 @@ class RelatorioController extends Controller
     {
         $this->authorize('isSecretarioOrAnalista', User::class);
         $relatorio = Relatorio::find($id);
+
         return view('relatorio.edit', compact('relatorio'));
     }
 
@@ -118,16 +120,16 @@ class RelatorioController extends Controller
     {
         $this->authorize('isSecretario', User::class);
         $relatorio = Relatorio::find($id);
-        $resultado = (boolean)$request->aprovacao;
+        $resultado = (bool) $request->aprovacao;
         $relatorio->motivo_edicao = $request->motivo;
 
-        $msg = "";
+        $msg = '';
         if ($resultado) {
             $relatorio->aprovacao = Relatorio::APROVACAO_ENUM['aprovado'];
-            $msg = "Relatório aprovado com sucesso!";
+            $msg = 'Relatório aprovado com sucesso!';
         } else {
             $relatorio->aprovacao = Relatorio::APROVACAO_ENUM['reprovado'];
-            $msg = "Relatório enviado para revisão do analista.";
+            $msg = 'Relatório enviado para revisão do analista.';
         }
 
         $relatorio->update();

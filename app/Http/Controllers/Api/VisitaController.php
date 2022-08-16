@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\VisitaCollection;
-use App\Http\Resources\VisitaResource;
 use App\Models\FotoVisita;
 use App\Models\Visita;
 use DateTime;
@@ -167,20 +165,21 @@ class VisitaController extends Controller
             'solicitacao_poda.requerente.user',
         )->get()->toArray();
         $tz = 'America/Recife';
-        foreach($dados as $i => $visita){
+        foreach ($dados as $i => $visita) {
             $dt = new DateTime($visita['data_marcada'], new DateTimeZone($tz));
             $visita['data_marcada'] = ($dt->format('Y-m-d\TH:i:s.u'));
 
-            if($visita['data_realizada'] != null){
+            if ($visita['data_realizada'] != null) {
                 $dt1 = new DateTime($visita['data_realizada'], new DateTimeZone($tz));
                 $visita['data_realizada'] = ($dt1->format('Y-m-d\TH:i:s.u'));
             }
 
-            if($visita['denuncia'] != null){
+            if ($visita['denuncia'] != null) {
                 $visita['denuncia']['texto'] = strip_tags($visita['denuncia']['texto']);
             }
             $dados[$i] = $visita;
         }
+
         return $dados;
     }
 
@@ -221,16 +220,16 @@ class VisitaController extends Controller
     {
         $request->validate([
             'id' => 'required|integer',
-            "image"      => "required|file|mimes:jpg,jpeg,bmp,png|max:2048",
-            "comentario" => "nullable|string|max:1000",
+            'image' => 'required|file|mimes:jpg,jpeg,bmp,png|max:2048',
+            'comentario' => 'nullable|string|max:1000',
         ]);
 
-        $visita =  Visita::find($request->id);
+        $visita = Visita::find($request->id);
         $arquivo = $request->image;
         $foto = new FotoVisita();
         $foto->visita_id = $visita->id;
         $foto->caminho = $arquivo->store("visitas/{$visita->id}");
-        if($request->comentario != null){
+        if ($request->comentario != null) {
             $foto->comentario = $request->comentario;
         }
         $foto->save();
@@ -251,13 +250,13 @@ class VisitaController extends Controller
     public function comentarioUpdate(Request $request)
     {
         $request->validate([
-            "comentario" => "nullable|string|max:1000",
+            'comentario' => 'nullable|string|max:1000',
         ]);
 
-        $foto =  FotoVisita::find($request->id_foto);
-        if($request->comentario != null){
+        $foto = FotoVisita::find($request->id_foto);
+        if ($request->comentario != null) {
             $foto->comentario = $request->comentario;
-        }else{
+        } else {
             $foto->comentario = null;
         }
         $foto->update();
@@ -274,11 +273,10 @@ class VisitaController extends Controller
      *
      * @urlParam id integer required O identificador da visita.
      * @urlParam id_foto integer required O identificador da foto da visita
-     *
      */
     public function imageDelete(Request $request)
     {
-        $foto =  FotoVisita::find($request->id_foto);
+        $foto = FotoVisita::find($request->id_foto);
         $foto->delete();
 
         return response()->json(['success' => 'success'], 200);
@@ -292,11 +290,10 @@ class VisitaController extends Controller
      * @response status=200 scenario="success" {"success": "success"}
      *
      * @urlParam id integer required O identificador da visita.
-     *
      */
     public function concluirVisita(Request $request)
     {
-        $visita =  Visita::find($request->id);
+        $visita = Visita::find($request->id);
         $visita->update(['data_realizada' => now()]);
 
         return response()->json(['success' => 'success'], 200);
@@ -356,11 +353,11 @@ class VisitaController extends Controller
      * @response status=200 scenario="success" {file}
      *
      * @response status=401 scenario="usuario nao autenticado" {"message": "Unauthenticated."}
-     *
      */
     public function getArquivoFotoVisita(Request $request)
     {
         $foto = FotoVisita::find($request->id_foto);
+
         return Storage::download($foto['caminho']);
     }
 }

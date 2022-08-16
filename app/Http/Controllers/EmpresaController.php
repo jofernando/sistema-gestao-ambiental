@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\EmpresaRequest;
-use App\Models\User;
-use App\Models\Setor;
+use App\Models\Cnae;
 use App\Models\Empresa;
 use App\Models\Endereco;
-use App\Models\Telefone;
-use App\Models\Cnae;
 use App\Models\Requerimento;
+use App\Models\Setor;
+use App\Models\Telefone;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 class EmpresaController extends Controller
 {
@@ -45,8 +45,10 @@ class EmpresaController extends Controller
         $empresa = Empresa::find($request->empresa);
         $requerimentos = Requerimento::where([['empresa_id', $empresa->id], ['status', '!=', Requerimento::STATUS_ENUM['cancelada']], ['cancelada', false]])->get();
         $tipos = Requerimento::TIPO_ENUM;
+
         return view('empresa.index-licenca', compact('requerimentos', 'empresa', 'tipos'));
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -119,7 +121,6 @@ class EmpresaController extends Controller
 
         //Adicionando
         foreach ($request->cnaes_id as $cnae_id) {
-
             if ($empresa->cnaes()->where('cnae_id', $cnae_id)->first() == null) {
                 $empresa->cnaes()->attach((Cnae::find($cnae_id)));
             }
@@ -127,7 +128,7 @@ class EmpresaController extends Controller
 
         //Excluindo
         foreach ($empresa->cnaes as $cnae) {
-            if (!(in_array($cnae->id, $request->cnaes_id))) {
+            if (! (in_array($cnae->id, $request->cnaes_id))) {
                 $empresa->cnaes()->detach($cnae->id);
             }
         }
@@ -185,6 +186,7 @@ class EmpresaController extends Controller
                 ],
             ]);
         }
+
         return response()->json([
             [
                 'tipo' => 'Renovação',

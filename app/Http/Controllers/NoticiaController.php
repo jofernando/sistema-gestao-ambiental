@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Noticia;
 use App\Http\Requests\NoticiaRequest;
+use App\Models\Noticia;
 
 class NoticiaController extends Controller
 {
@@ -16,6 +15,7 @@ class NoticiaController extends Controller
     public function index()
     {
         $noticias = Noticia::orderBy('created_at', 'DESC')->paginate(10);
+
         return view('noticia.index', compact('noticias'));
     }
 
@@ -27,6 +27,7 @@ class NoticiaController extends Controller
     public function create()
     {
         $this->authorize('create', Noticia::class);
+
         return view('noticia.create');
     }
 
@@ -92,6 +93,7 @@ class NoticiaController extends Controller
         }
 
         $noticia->update();
+
         return redirect(route('noticias.index'))->with(['success' => 'Notícia atualizada com sucesso!']);
     }
 
@@ -121,7 +123,10 @@ class NoticiaController extends Controller
     public function visualizar($titulo)
     {
         $noticia = Noticia::where('link', route('noticias.visualizar', ['titulo' => $titulo]))->first();
-        if($noticia == null) abort(404);
+        if ($noticia == null) {
+            abort(404);
+        }
+
         return view('noticia.visualizar', compact('noticia'));
     }
 }
